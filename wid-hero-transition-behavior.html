@@ -1,0 +1,84 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../neon-animation/neon-animation.html">
+<link rel="import" href="../neon-animation/neon-animations.html">
+<link rel="import" href="../wid-animation-merger-behavior/wid-animation-merger-behavior.html">
+
+<script>
+(function() {
+
+  Polymer.WidHeroTransitionBehaviorImpl = {
+    properties: {
+      withHeroTransition: {
+        type: Boolean,
+        value: false
+      },
+
+
+      _fromHeroTransitionAnimation: {
+        type: Object,
+        readOnly: true,
+        value: function () {
+          return {
+            'exit': [{
+              name: 'hero-animation',
+              id: 'hero',
+              fromPage: this
+            }]
+          };
+        }
+      },
+
+      _toHeroTransitionAnimation: {
+        type: Object,
+        readOnly: true,
+        value: function() {
+          return {
+            'entry': [{
+              name: 'hero-animation',
+              id: 'hero',
+              toPage: this,
+              timing: {
+                delay: 150
+              }
+            }, {
+              name: 'fade-in-animation',
+              node: this
+            }],
+
+            'exit': [{
+              name: 'transform-animation',
+              transformFrom: 'none',
+              transformTo: 'translate(0px,-200vh)',
+              node: this.$.card
+            }]
+          };
+        }
+      }
+    },
+
+    observers: [
+      '_onFromHeroTransitionChanged(animationConfig, _fromHeroTransitionAnimation, withHeroTransition)',
+      '_onToHeroTransitionChanged(animationConfig, _toHeroTransitionAnimation, withHeroTransition)'
+    ],
+
+    _onFromHeroTransitionChanged: function () {
+      if (this.withHeroTransition) {
+        this._mergeAnimation(this._fromHeroTransitionAnimation);
+      }
+    },
+
+    _onToHeroTransitionChanged: function (value) {
+      if (this.withHeroTransition) {
+        this._mergeAnimation(this._toHeroTransitionAnimation);
+      }
+    }
+  };
+
+  Polymer.WidHeroTransitionBehavior = [
+    Polymer.NeonSharedElementAnimatableBehavior,
+    Polymer.WidAnimationMergerBehavior,
+    Polymer.WidHeroTransitionBehaviorImpl
+  ];
+
+})();
+</script>
