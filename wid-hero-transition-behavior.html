@@ -8,7 +8,20 @@
 
   Polymer.WidHeroTransitionBehaviorImpl = {
     properties: {
-      withHeroTransition: {
+      /**
+       * Use the from configuration.
+       * @type {Boolean}
+       */
+      fromHeroTransition: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Use the to configuration.
+       * @type {Boolean}
+       */
+      toHeroTransition: {
         type: Boolean,
         value: false
       },
@@ -53,23 +66,53 @@
             }]
           };
         }
+      },
+
+      _backdropRippleAnimation: {
+        type: Object,
+        readOnly: true,
+        value: function () {
+          return {
+            name: 'ripple-animation',
+            id: 'ripple',
+            toPage: this
+          };
+        }
+      },
+
+      _backdropFadeOutAnimation: {
+        type: Object,
+        readOnly: true,
+        value: function () {
+          return {
+            name: 'fade-out-animation',
+            node: this.$.fixed
+          };
+        }
       }
     },
 
     observers: [
-      '_onFromHeroTransitionChanged(animationConfig, _fromHeroTransitionAnimation, withHeroTransition)',
-      '_onToHeroTransitionChanged(animationConfig, _toHeroTransitionAnimation, withHeroTransition)'
+      '_onFromHeroTransitionChanged(animationConfig, _fromHeroTransitionAnimation, fromHeroTransition)',
+      '_onToHeroTransitionChanged(animationConfig, _toHeroTransitionAnimation, toHeroTransition, withBackdrop)'
     ],
 
     _onFromHeroTransitionChanged: function () {
-      if (this.withHeroTransition) {
+      if (this.fromHeroTransition) {
         this._mergeAnimation(this._fromHeroTransitionAnimation);
       }
     },
 
-    _onToHeroTransitionChanged: function (value) {
-      if (this.withHeroTransition) {
-        this._mergeAnimation(this._toHeroTransitionAnimation);
+    _onToHeroTransitionChanged: function () {
+      if (this.toHeroTransition) {
+
+        var config = Object.assign({}, this._toHeroTransitionAnimation);
+        if (this.withBackdrop) {
+          config.entry = [this._backdropRippleAnimation].concat(config.entry);
+          config.exit = [this._backdropFadeOutAnimation].concat(config.exit);
+        }
+        this._mergeAnimation(config);
+
       }
     }
   };
